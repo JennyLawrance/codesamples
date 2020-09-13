@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Mime;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -39,8 +40,25 @@ namespace networkproxy
                     {
                         try
                         {
+                            string url = "";
+                            bool isIpPresent = false;
                             query = context.Request.Query["url"];
-                            HttpResponseMessage response = await httpClient.GetAsync(query);
+                            if (context.Request.Query.ContainsKey("ip"))
+                            {
+                                url = $"http://{context.Request.Query["ip"]}/";
+                                isIpPresent = true;
+                            }
+                            else
+                            {
+                                url = query;
+                            }
+
+                            HttpRequestMessage rq = new HttpRequestMessage(HttpMethod.Get, url);
+                            if (isIpPresent)
+                            {
+                                rq.Headers.Host = query;
+                            }
+                            HttpResponseMessage response = await httpClient.SendAsync(rq);
                             string responseContent = await response.Content.ReadAsStringAsync();
                             await context.Response.WriteAsync($"response from {query}: {responseContent}");
                         }
