@@ -37,10 +37,17 @@ namespace networkproxy
                     string query = string.Empty;
                     if (context.Request.Query.ContainsKey("url"))
                     {
-                        query = context.Request.Query["url"];
-                        HttpResponseMessage response = await httpClient.GetAsync(query);
-                        string responseContent = await response.Content.ReadAsStringAsync();
-                        await context.Response.WriteAsync($"response from {query}: {responseContent}");
+                        try
+                        {
+                            query = context.Request.Query["url"];
+                            HttpResponseMessage response = await httpClient.GetAsync(query);
+                            string responseContent = await response.Content.ReadAsStringAsync();
+                            await context.Response.WriteAsync($"response from {query}: {responseContent}");
+                        }
+                        catch (Exception e)
+                        {
+                            await context.Response.WriteAsync($"Exception {e.ToString()}");
+                        }
                     }
                 });
 
